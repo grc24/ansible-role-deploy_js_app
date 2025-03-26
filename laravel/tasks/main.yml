@@ -92,9 +92,9 @@
   loop: "{{ project_directory_name }}"
 
 # Up application
-- name: Start Docker Compose application
-  command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d
-  args:
-    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+#- name: Start Docker Compose application
+ # command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d
+  #args:
+   # chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
 
     
