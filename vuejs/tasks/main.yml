@@ -1,0 +1,94 @@
+---
+# tasks file for vuejs
+
+# Create Project folder
+- name: Creates Project directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/{{ project_name }}
+    state: directory
+
+
+
+# Clone repository
+- name: Clone the repository
+  git:
+    repo: "{{ item.repository }}"
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    version: "{{ item.branch_work }}"
+    update: yes
+    force: yes
+  loop: "{{ project_directory_name }}"
+
+  register: git_clone_result
+
+- name: Display clone result
+  debug:
+    var: git_clone_result
+
+  
+# Docker Network
+- name: Check if network exist
+  command: docker network inspect {{ network_name }} 
+  register: result
+  ignore_errors: True
+
+
+
+- name: Create Docker network
+  command: docker network create {{ network_name }} 
+  when: result is failed
+
+- name: Creates docker entrypoint folder
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker
+    state: directory
+
+
+- name: copy config
+  template:
+    src: config
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker/config
+
+
+# Custome docker compose and env
+- name: copy Dockerfile
+  template:
+    src: Dockerfile
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
+
+
+- name: Set lowercase project name
+  set_fact:
+    docker_image_name: "{{ project_name | lower }}"
+
+- name: Check if image already exist
+  command: docker image inspect {{ docker_image_name }} 
+  register: result_image
+  ignore_errors: True
+
+ 
+# build the app
+- name: Build Docker image
+  command:  docker build -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  when: result_image is failed
+  register: output
+
+- name: view image 
+  debug:
+    var: output
+  
+- name: Update file docker compose
+  template:
+    src:  docker-compose.yml
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
+  loop: "{{ project_directory_name }}"
+
+# Up application
+- name: Start Docker Compose application
+  command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+
+    

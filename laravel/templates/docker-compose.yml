@@ -1,0 +1,34 @@
+version: "3.4"
+
+services:
+  api:
+    image: "{{ project_name | lower }}:api"
+    container_name: "{{ project_name }}_api"
+    restart: always
+    ports:
+      - "{{ item.ports }}:80"
+    depends_on:
+      - "{{ item.db_container }}"
+
+  {{ item.db_container }}:
+    image: "{{ item.db_image }}"
+    container_name: "{{ project_name }}_db"
+    restart: always
+    expose: 
+      - "{{ item.db_port }}"
+    command: ["mysqld", "--disable-log-bin"]
+    volumes:
+      - "{{ item.db_volume }}:/var/lib/mysql"
+    environment:
+      MYSQL_DATABASE: "{{ item.db_database }}"
+      MYSQL_USER: "{{ item.db_user }}"
+      MYSQL_PASSWORD: "{{ item.db_password }}"
+      MYSQL_ROOT_PASSWORD: "{{ item.db_root_password }}"
+
+volumes:
+  "{{ item.db_volume }}":
+
+networks:
+  default:
+    external: true
+    name: "{{ network_name }}"

@@ -1,0 +1,5 @@
+[dev]
+localhost ansile_host=127.0.0.1 ansible_user=seidou ansible_password= ansible_become_password=
+
+[preprod]
+141.94.206.142 ansile_host=141.94.206.142 ansible_user=debian ansible_become_password= ansible_password=

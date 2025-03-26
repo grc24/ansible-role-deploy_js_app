@@ -1,0 +1,22 @@
+---
+# vars file for adonisjs
+project_directory_name: 
+  - repository: https://github.com/merveille-agbakou/BACKEND_TEST_WAOUH.git
+    branch_work: main
+    ports: 8397
+    db_image: postgres:15
+    db_port: 5432
+    db_dynamc_port: 8398
+    db_password: TqtUKdgNhjZQJK
+    db_user: admin_user
+    db_volume: psql-data
+    db_database: adonis_db
+    db_container: db_eventpass
+    
+
+project_name: merveille-agbakou
+clone_directory: BACKEND_TEST_WAOUH
+
+
+public_host: 141.94.206.142
+network_name: recrutement

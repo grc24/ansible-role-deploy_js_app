@@ -1,0 +1,32 @@
+---
+# vars file for vuejs
+# project_directory_name: 
+#   - repository: https://github.com/Autinele/eventpass.git
+#     branch_work: main
+#     ports: 8395
+#     db_image: mysql:8.0.28-oracle
+#     db_port: 3306
+#     db_password: TqtUKdgNhjZQJKz
+#     db_user: admin_user
+#     db_volume: mysql-data
+#     db_database: admin_db
+#     db_root_password: TqtUKdgNhjZQJKz
+#     db_container: db_eventpass
+    
+# project_name: Autinele
+# clone_directory: eventpass
+
+
+# public_host: localhost
+# network_name: recrutement
+project_directory_name: 
+  - repository: https://github.com/merveille-agbakou/FRONTEND_VUE_TEST_WAOUHM.git
+    branch_work: main
+    ports: 8396
+
+project_name: merveille_agbakou
+clone_directory: FRONTEND_VUE_TEST_WAOUHM
+
+
+public_host: 141.94.206.142
+network_name: recrutement

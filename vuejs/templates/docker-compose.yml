@@ -1,0 +1,15 @@
+version: "3.4"
+
+services:
+  frontend_vue:
+    image: "{{ project_name | lower }}"
+    container_name: "{{ project_name }}"
+    restart: always
+    ports:
+      - "{{ item.ports }}:80"
+
+
+networks:
+  default:
+    external: true
+    name: "{{ network_name }}"
