@@ -171,4 +171,3 @@
     GIT_SSH_COMMAND: "ssh -i {{ private_key }}"
   loop: "{{ project_directory_name }}"
 
-
