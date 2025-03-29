@@ -1,94 +1,174 @@
 ---
-# tasks file for vuejs
+# # tasks file for vuejs
+# # Create Project folder
+# - name: Creates Project directory
+#   ansible.builtin.file:
+#     path: /home/{{ ansible_user }}/{{ project_name }}
+#     state: directory
 
-# Create Project folder
-- name: Creates Project directory
-  ansible.builtin.file:
-    path: /home/{{ ansible_user }}/{{ project_name }}
-    state: directory
+# # Clone repository
+# - name: Clone the repository
+#   git:
+#     repo: "{{ item.repository }}"
+#     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+#     version: "{{ item.branch_work }}"
+#     update: yes
+#     force: yes
+#     accept_hostkey: yes
+#     key_file: "{{ private_key }}"
+#   loop: "{{ project_directory_name }}"
+#   register: git_clone_result
 
 
-
-# Clone repository
-- name: Clone the repository
-  git:
-    repo: "{{ item.repository }}"
-    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
-    version: "{{ item.branch_work }}"
-    update: yes
-    force: yes
-  loop: "{{ project_directory_name }}"
-
-  register: git_clone_result
-
-- name: Display clone result
-  debug:
-    var: git_clone_result
+# - name: Display clone result
+#   debug:
+#     var: git_clone_result
 
   
-# Docker Network
-- name: Check if network exist
-  command: docker network inspect {{ network_name }} 
-  register: result
-  ignore_errors: True
+# # Docker Network
+# - name: Check if network exist
+#   command: docker network inspect {{ network_name }} 
+#   register: result
+#   ignore_errors: True
 
 
 
-- name: Create Docker network
-  command: docker network create {{ network_name }} 
-  when: result is failed
+# - name: Create Docker network
+#   command: docker network create {{ network_name }} 
+#   when: result is failed
 
-- name: Creates docker entrypoint folder
-  ansible.builtin.file:
-    path: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker
-    state: directory
-
-
-- name: copy config
-  template:
-    src: config
-    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker/config
+# - name: Creates docker entrypoint folder
+#   ansible.builtin.file:
+#     path: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker
+#     state: directory
 
 
-# Custome docker compose and env
-- name: copy Dockerfile
-  template:
-    src: Dockerfile
-    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
+# - name: copy config
+#   template:
+#     src: config
+#     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker/config
 
 
-- name: Set lowercase project name
-  set_fact:
-    docker_image_name: "{{ project_name | lower }}"
+# # Custome docker compose and env
+# - name: copy Dockerfile
+#   template:
+#     src: Dockerfile
+#     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
 
-- name: Check if image already exist
-  command: docker image inspect {{ docker_image_name }} 
-  register: result_image
-  ignore_errors: True
+
+# - name: Set lowercase project name
+#   set_fact:
+#     docker_image_name: "{{ clone_directory | lower }}"
+
+# # - name: Check if image already exist
+# #   command: docker image inspect {{ docker_image_name }} 
+# #   register: result_image
+# #   ignore_errors: True
 
  
-# build the app
-- name: Build Docker image
-  command:  docker build -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
-  args:
-    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
-  when: result_image is failed
-  register: output
+# # build the app
+# - name: Build Docker image
+#   command:  docker build -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+#   args:
+#     chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+#   #when: result_image is failed
+#   register: output
 
-- name: view image 
-  debug:
-    var: output
+# - name: view image 
+#   debug:
+#     var: output
   
-- name: Update file docker compose
-  template:
-    src:  docker-compose.yml
-    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
-  loop: "{{ project_directory_name }}"
+# - name: Update file docker compose
+#   template:
+#     src:  docker-compose.yml
+#     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
+#   mode: '0755'
+#   loop: "{{ project_directory_name }}"
 
-# Up application
-- name: Start Docker Compose application
-  command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d
-  args:
-    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+# # Up application
+# - name: Start Docker Compose application
+#   command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d
+#   args:
+#     chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+#   register: output
 
     
+# # ##### Reverse proxy
+# - name: Configure Nginx server block 
+#   template:
+#     src:  nginx.conf
+#     dest: /etc/nginx/sites-available/{{ item.server_name }}
+#   loop: "{{ server_blocks }}"
+
+# - name: Enable the server block 
+#   file:
+#     src: /etc/nginx/sites-available/{{ item.server_name }}
+#     dest: /etc/nginx/sites-enabled/{{ item.server_name }}
+#     state: link
+#   loop: "{{ server_blocks }}"
+
+
+# - name: Test Nginx configuration
+#   command: nginx -t
+#   register: nginx_test
+
+# - name: Display Nginx test output
+#   debug:
+#     var: nginx_test.stdout
+
+# - name: Reload Nginx
+#   service:
+#     name: nginx
+#     state: reloaded
+
+
+# - name: Obtain SSL certificates and configure Nginx
+#   command: >
+#     certbot --nginx
+#     --non-interactive
+#     --agree-tos
+#     --email {{ item.email }}
+#     -d {{ item.server_name }}
+#   loop: "{{ server_blocks }}"
+
+# - name: Test Nginx configuration after SSL setup
+#   command: nginx -t
+#   register: nginx_ssl_test
+
+# - name: Display Nginx SSL test output
+#   debug:
+#     var: nginx_ssl_test.stdout{{ item.port }}
+#   loop: "{{ server_blocks }}"
+
+# - name: Reload Nginx to apply SSL configuration
+#   service:
+#     name: nginx
+#     state: reloaded
+
+#### Gitlab runner
+
+- name: Copy .gitlab-ci.yml
+  template:
+    src: .gitlab-ci.yml
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.gitlab-ci.yml
+    mode: '0644'
+  loop: "{{ project_directory_name }}"
+
+- name: Create user and email for local git repository
+  shell: |
+    cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    git config user.name {{ username }} && git config user.email {{ item.email }}
+  loop: "{{ server_blocks }}"
+
+
+- name: Commit and push changes to GitLab
+  shell: |
+    cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    git add .
+    git commit -m "Automated commit from Ansible - {{ ansible_date_time.iso8601 }}"
+    git push origin "{{ item.branch_work }}"
+  environment:
+    GIT_SSH_COMMAND: "ssh -i {{ private_key }}"
+  loop: "{{ project_directory_name }}"
+
+

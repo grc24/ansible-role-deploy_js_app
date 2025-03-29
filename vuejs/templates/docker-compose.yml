@@ -1,9 +1,9 @@
 version: "3.4"
 
 services:
-  frontend_vue:
-    image: "{{ project_name | lower }}"
-    container_name: "{{ project_name }}"
+  "{{ service_name }}"
+    image: "{{ clone_directory | lower }}"
+    container_name: "{{ clone_directory }}"
     restart: always
     ports:
       - "{{ item.ports }}:80"

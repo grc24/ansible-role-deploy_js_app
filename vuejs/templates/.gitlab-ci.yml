@@ -1,0 +1,53 @@
+stages:
+    - test
+    - build
+    - deploy
+
+sast:
+  stage: test
+
+
+
+variables:
+  OLD_IMAGE: "image: {{ clone_directory | lower }}"
+  UPDTED_IMAGE: "image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+
+
+include:
+- template: Security/SAST.gitlab-ci.yml
+
+build:
+  image: docker:19.03.1
+  stage: build
+  variables:
+    IMAGE_LATEST: $CI_REGISTRY_IMAGE
+  services:
+    - docker:19.03.1-dind
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker tag $CI_REGISTRY_IMAGE {{ clone_directory | lower }}
+    - docker push $CI_REGISTRY_IMAGE
+  when: on_success
+  tags:
+    - "{{ runner }}"
+  only:
+    - "{{ item.branch_work }}"
+
+
+deploy:
+  stage: deploy
+  variables:
+    IMAGE_LATEST: $CI_REGISTRY_IMAGE
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script: 
+    - cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+    #- sudo chown -R $USER:$USER docker-compose.yml && chmod 755 docker-compose.yml && sed -i "s|$OLD_IMAGE|$UPDATED_IMAGE|" docker-compose.yml
+    - docker compose down {{ service_name }} && docker compose up -d {{ service_name }}
+  tags:
+    - "{{ runner }}"
+  only: 
+    - "{{ item.branch_work }}"
+

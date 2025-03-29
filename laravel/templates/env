@@ -2,7 +2,7 @@ APP_NAME=Laravel
 APP_ENV=local
 APP_KEY=base64:h09MRMTiXThr0gfBQiOg0XDfdxSok2gpH05kI6knG04=
 APP_DEBUG=true
-APP_URL=http://{{ public_host }}:{{ item.ports }}
+APP_URL=https://{{ item.server_name }}
 
 APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
@@ -21,7 +21,7 @@ LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=debug
 
 DB_CONNECTION=mysql
-DB_HOST={{ item.db_container }}
+DB_HOST={{ item.db_host }}
 DB_PORT={{ item.db_port }}
 DB_DATABASE={{ item.db_database }}
 DB_USERNAME={{ item.db_user }}

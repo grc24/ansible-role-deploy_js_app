@@ -1,18 +1,18 @@
 ---
-- name: Installation et configuration projet Laravel
-  hosts:  preprod
-  become: true
-  roles:
-    - laravel
+# - name: Installation et configuration projet Laravel
+#   hosts:  preprod
+#   become: true
+#   roles:
+#     - laravel
 
-- name: Installation et configuration projet Adonisjs
-  hosts:  preprod
-  become: true
-  roles:
-    - adonisjs
+# - name: Installation et configuration projet Adonisjs
+#   hosts:  preprod
+#   become: true
+#   roles:
+#     - adonisjs
 
-- name: Installation et configuration projet Adonisjs
+- name: Installation et configuration projet Vuejs
   hosts:  preprod
   become: true
   roles:
-    - adonisjs
+    - vuejs

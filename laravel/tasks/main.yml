@@ -65,7 +65,7 @@
 
 - name: Set lowercase project name
   set_fact:
-    docker_image_name: "{{ project_name | lower }}:api"
+    docker_image_name: "{{ clone_directory | lower }}:api"
 
 - name: Check if image already exist
   command: docker image inspect {{ docker_image_name }} 
@@ -89,6 +89,7 @@
   template:
     src:  docker-compose.yml
     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
+  mode: '0755'
   loop: "{{ project_directory_name }}"
 
 # Up application
@@ -97,4 +98,80 @@
   args:
     chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
 
-    
+
+# ##### Reverse proxy
+- name: Configure Nginx server block 
+  template:
+    src:  nginx.conf
+    dest: /etc/nginx/sites-available/{{ item.server_name }}
+  loop: "{{ server_blocks }}"
+
+- name: Enable the server block 
+  file:
+    src: /etc/nginx/sites-available/{{ item.server_name }}
+    dest: /etc/nginx/sites-enabled/{{ item.server_name }}
+    state: link
+  loop: "{{ server_blocks }}"
+
+
+- name: Test Nginx configuration
+  command: nginx -t
+  register: nginx_test
+
+- name: Display Nginx test output
+  debug:
+    var: nginx_test.stdout
+
+- name: Reload Nginx
+  service:
+    name: nginx
+    state: reloaded
+
+
+- name: Obtain SSL certificates and configure Nginx
+  command: >
+    certbot --nginx
+    --non-interactive
+    --agree-tos
+    --email {{ item.email }}
+    -d {{ item.server_name }}
+  loop: "{{ server_blocks }}"
+
+- name: Test Nginx configuration after SSL setup
+  command: nginx -t
+  register: nginx_ssl_test
+
+- name: Display Nginx SSL test output
+  debug:
+    var: nginx_ssl_test.stdout{{ item.port }}
+  loop: "{{ server_blocks }}"
+
+- name: Reload Nginx to apply SSL configuration
+  service:
+    name: nginx
+    state: reloaded 
+
+#### Gitlab runner
+- name: Copy .gitlab-ci.yml
+  template:
+    src: .gitlab-ci.yml
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.gitlab-ci.yml
+    mode: '0644'
+  loop: "{{ project_directory_name }}"
+
+- name: Create user and email for local git repository
+  shell: |
+    cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    git config user.name {{ username }} && git config user.email {{ item.email }}
+  loop: "{{ server_blocks }}"
+
+
+- name: Commit and push changes to GitLab
+  shell: |
+    cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    git add .
+    git commit -m "Automated commit from Ansible - {{ ansible_date_time.iso8601 }}"
+    git push origin "{{ item.branch_work }}"
+  environment:
+    GIT_SSH_COMMAND: "ssh -i {{ private_key }}"
+  loop: "{{ project_directory_name }}"

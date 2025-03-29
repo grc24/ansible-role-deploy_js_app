@@ -1,24 +1,14 @@
 ---
 # vars file for laravel
-# project_directory_name: 
-#   - repository: https://github.com/Milla231/Evenia.git
-#     branch_work: main
-#     ports: 8394
-#     db_image: mysql:8.0.28-oracle
-#     db_port: 3306
-#     db_password: TqtUKdgNhjZQJKz
-#     db_user: admin_user
-#     db_volume: mysql-data
-#     db_database: admin_db
-#     db_root_password: TqtUKdgNhjZQJKz
-#     db_container: db_Rush95_kwagu
 
+#### Project variables
 project_directory_name: 
   - repository: https://github.com/KARELTOWN/giorgiogbessayaproject.git
     branch_work: main
     ports: 8399
     db_image: mysql:8.0.28-oracle
-    db_port: 3306
+    db_host: op27573-002.eu.clouddb.ovh.net
+    db_port: 35710
     db_password: TqtUKdgNhjZQJK
     db_user: admin_user
     db_volume: mysql-data
@@ -30,7 +20,17 @@ project_directory_name:
 
 project_name: KARELTOWN
 clone_directory: giorgiogbessayaproject
+username: waouhmonde_dav97
+runner: frontend-flashcar-pack
+service_name: frontend_vue
 
+#### SSL variables
+server_blocks:
+  - server_name: flashcar-parck.waouhmonde.com
+    port: 8396
+    email: david.seidou@waouhmonde.com
 
+#### Global Variables 
 public_host: 141.94.206.142
-network_name: recrutement
+private_key: /home/debian/.ssh/id_rsa
+network_name: flashcar
