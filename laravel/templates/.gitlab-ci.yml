@@ -10,7 +10,7 @@ sast:
 
 variables:
   OLD_IMAGE: "image: {{ clone_directory | lower }}:api"
-  UPDTED_IMAGE: "image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+  UPDATED_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
 
 include:
@@ -26,9 +26,9 @@ build:
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
-    - docker build -t $CI_REGISTRY_IMAGE .
-    - docker tag $CI_REGISTRY_IMAGE {{ clone_directory | lower }}:api
-    - docker push $CI_REGISTRY_IMAGE
+    - echo  $UPDATED_IMAGE && docker build -t UPDATED_IMAGE .
+    - docker tag $UPDATED_IMAGE {{ clone_directory | lower }}:api
+    - docker push $UPDATED_IMAGE
   when: on_success
   tags:
     - "{{ runner }}"
