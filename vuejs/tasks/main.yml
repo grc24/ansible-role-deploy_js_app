@@ -1,6 +1,9 @@
 ---
-# # tasks file for vuejs
-# # Create Project folder
+# TASK FOR VUE.JS
+
+
+
+# Create Project folder
 # - name: Creates Project directory
 #   ansible.builtin.file:
 #     path: /home/{{ ansible_user }}/{{ project_name }}
@@ -82,7 +85,7 @@
 #   template:
 #     src:  docker-compose.yml
 #     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
-#   mode: '0755'
+#     mode: '0755'
 #   loop: "{{ project_directory_name }}"
 
 # # Up application

@@ -1,7 +1,7 @@
 version: "3.4"
 
 services:
-  "{{ service_name }}"
+  "{{ service_name }}":
     image: "{{ clone_directory | lower }}"
     container_name: "{{ clone_directory }}"
     restart: always

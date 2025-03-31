@@ -26,9 +26,9 @@ build:
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
-    - echo  $UPDATED_IMAGE && docker build -t UPDATED_IMAGE .
-    - docker tag $UPDATED_IMAGE {{ clone_directory | lower }}
-    - docker push $UPDATED_IMAGE
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker tag $CI_REGISTRY_IMAGE {{ clone_directory | lower }}
+    - docker push $CI_REGISTRY_IMAGE
   when: on_success
   tags:
     - "{{ runner }}"
