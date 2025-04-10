@@ -3,34 +3,30 @@
 
 #### Project variables
 project_directory_name: 
-  - repository: https://github.com/KARELTOWN/giorgiogbessayaproject.git
-    branch_work: main
-    ports: 8399
-    db_image: mysql:8.0.28-oracle
+  - repository: git@gitlab.com:waouhmonde/api-flashcar-pack.git
+    branch_work: master
+    ports: 8400
     db_host: op27573-002.eu.clouddb.ovh.net
     db_port: 35710
-    db_password: TqtUKdgNhjZQJK
-    db_user: admin_user
-    db_volume: mysql-data
-    db_database: admin_db
-    db_root_password: TqtUKdgNhjZQJK
-    db_container: db_giorgiogbessayaproject
+    db_password: TqtUKdgNhjZQJK3
+    server_name: api.flashcar-parck.waouhmonde.com
+    db_user: flashcar_user
+    db_database: flashcar_pack_db
     
-
-
-project_name: KARELTOWN
-clone_directory: giorgiogbessayaproject
+#### Repository information
+project_name: FLASHCAR-APP
+clone_directory: api-flashcar-pack
 username: waouhmonde_dav97
-runner: frontend-flashcar-pack
-service_name: frontend_vue
+runner: api-flashcar-pack
+service_name: api_flashcar
 
-#### SSL variables
+#### Domaine information
 server_blocks:
-  - server_name: flashcar-parck.waouhmonde.com
-    port: 8396
+  - server_name: api.flashcar-parck.waouhmonde.com
+    port: 8400
     email: david.seidou@waouhmonde.com
 
-#### Global Variables 
+#### Instance Information
 public_host: 141.94.206.142
 private_key: /home/debian/.ssh/id_rsa
 network_name: flashcar

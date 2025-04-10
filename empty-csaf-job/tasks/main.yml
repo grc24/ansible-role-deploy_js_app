@@ -1,0 +1,28 @@
+# tasks file for empty-csaf-job
+---
+- name: Show size of /usr/src/myapp/public/files/roles before deletion
+  community.docker.docker_container_exec:
+    container: csaf-job
+    command: du -sh /usr/src/myapp/public/files/roles
+    user: root
+  register: output
+
+- name: Show the size
+  debug:
+    var: output.sdtout
+
+- name: Remove files in /usr/src/myapp/public/files/roles inside csaf-job container
+  shell: docker exec -it csaf-job rm -rf /usr/src/myapp/public/files/roles/*
+
+- name: Show size after deletion
+  community.docker.docker_container_exec:
+    container: csaf-job
+    command: du -sh /usr/src/myapp/public/files/roles
+    user: root
+  register: after
+
+- name: Show the size after deletion
+  debug:
+    var: after.output
+
+

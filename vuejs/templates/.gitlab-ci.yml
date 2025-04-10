@@ -6,12 +6,9 @@ stages:
 sast:
   stage: test
 
-
-
 variables:
   OLD_IMAGE: "image: {{ clone_directory | lower }}"
   UPDATED_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-
 
 include:
 - template: Security/SAST.gitlab-ci.yml

@@ -1,32 +1,12 @@
 version: "3.4"
 
 services:
-  api:
+  "{{ service_name }}":
     image: "{{ clone_directory | lower }}:api"
     container_name: "{{ clone_directory }}_api"
     restart: always
     ports:
       - "{{ item.ports }}:80"
-    # depends_on:
-    #   - "{{ item.db_container }}"
-
-  # {{ item.db_container }}:
-  #   image: "{{ item.db_image }}"
-  #   container_name: "{{ project_name }}_db"
-  #   restart: always
-  #   expose: 
-  #     - "{{ item.db_port }}"
-  #   command: ["mysqld", "--disable-log-bin"]
-  #   volumes:
-  #     - "{{ item.db_volume }}:/var/lib/mysql"
-  #   environment:
-  #     MYSQL_DATABASE: "{{ item.db_database }}"
-  #     MYSQL_USER: "{{ item.db_user }}"
-  #     MYSQL_PASSWORD: "{{ item.db_password }}"
-  #     MYSQL_ROOT_PASSWORD: "{{ item.db_root_password }}"
-
-# volumes:
-#   "{{ item.db_volume }}":
 
 networks:
   default:
