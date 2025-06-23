@@ -1,2 +1,2 @@
 [preprod]
-141.94.206.142 ansile_host=141.94.206.142 ansible_user=debian ansible_become_password= ansible_password=
+host ansile_host=host_ip ansible_user=debian ansible_become_password= ansible_password=
