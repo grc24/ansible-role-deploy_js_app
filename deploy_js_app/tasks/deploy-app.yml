@@ -1,0 +1,111 @@
+---
+# tasks file for adonisjs
+# Create Project folder
+- name: Creates Project directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/{{ project_name }}
+    state: directory
+
+# Verifies if project directory exists
+- name: Check if project directory exists
+  ansible.builtin.stat:
+    path: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+  register: project_dir_stat
+
+- name: Debug project directory status
+  debug:
+    var: project_dir_stat
+
+# Clone repository
+- name: Clone the repository
+  git:
+    repo: "{{ item.repository }}"
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    version: "{{ item.branch_work }}"
+    accept_hostkey: yes
+    key_file: "{{ private_key }}"
+    update: yes
+    force: yes
+  when: not project_dir_stat.stat.exists
+  loop: "{{ project_directory_name }}"
+  register: git_clone_result
+
+- name: Display clone result
+  debug:
+    var: git_clone_result
+
+# Docker Network
+- name: Check if network exist
+  command: docker network inspect {{ network_name }} 
+  register: result
+  ignore_errors: True
+
+- name: Create Docker network
+  command: docker network create {{ network_name }} 
+  when: result is failed
+
+# Custome docker compose and env
+- name: copy env
+  template:
+    src: .env
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.env
+  when: TYPE_PROJECT == "nodejs"
+  loop: "{{ project_directory_name }}"
+  
+- name: copy env for non-Node.js
+  template:
+    src: nest.env
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.env
+  when: TYPE_PROJECT != "nodejs"
+  loop: "{{ project_directory_name }}"
+
+- name: copy Dockerfile for Node.js
+  template:
+    src: Dockerfile
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
+  when: TYPE_PROJECT == "nodejs"
+  loop: "{{ project_directory_name }}"
+
+- name: copy Dockerfile for non-Node.js
+  template:
+    src: nest.Dockerfile
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
+  when: TYPE_PROJECT != "nodejs"
+  loop: "{{ project_directory_name }}"
+
+
+- name: Set lowercase project name
+  set_fact:
+    docker_image_name: "{{ project_name | lower }}_api"
+
+- name: Check if image already exist
+  command: docker image inspect {{ docker_image_name }} 
+  register: result_image
+  ignore_errors: True
+
+- name: Build Docker image
+  command:  docker build  --build-arg DATABASE_URL={{ item.database_url }} --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }} --build-arg NODE_ENV={{ ENV }} --build-arg NODE_VERSION={{ NODE_VERSION }} -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  when: result_image is failed
+  loop: "{{ project_directory_name }}"
+  register: output
+
+- name: view image 
+  debug:
+    var: output
+  
+- name: Update file docker compose
+  template:
+    src:  docker-compose.yml
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
+  loop: "{{ project_directory_name }}"
+
+
+- name: Start Docker Compose application
+  command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+  loop: "{{ project_directory_name }}"
+
+    

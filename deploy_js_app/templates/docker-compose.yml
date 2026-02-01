@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  "{{ item.service_name }}":
+    image: "{{ project_name | lower }}_api"
+    container_name: "{{ project_name }}_api"
+    restart: always
+    ports:
+      - "{{ item.ports }}:{{ item.app_port }}"
+    env_file:
+      - .env
+    {% if item.remote_db == 0 %}
+    depends_on:
+      - "{{ item.db_container }}"
+    {% endif %}
+
+  {% if item.remote_db == 0 %}
+  "{{ item.db_container }}":
+    image: "{{ item.db_image }}"
+    container_name: "{{ item.db_container }}_db"
+    restart: always
+    environment:
+      POSTGRES_USER: "{{ item.db_user }}"
+      POSTGRES_PASSWORD: "{{ item.db_password }}"
+      POSTGRES_DB: "{{ item.db_database }}"
+    ports:
+      - "{{ item.db_dynamc_port }}:{{ item.db_port }}"
+    volumes:
+      - "{{ item.db_volume }}:/var/lib/postgresql/data"
+    expose: 
+      - "{{ item.db_port }}"
+  {% endif %}
+
+
+{% if item.remote_db == 0 %}
+volumes:
+  "{{ item.db_volume }}":
+{% endif %}
+
+networks:
+  default:
+    external: true
+    name: "{{ network_name }}"

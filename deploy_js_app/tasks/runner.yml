@@ -1,0 +1,63 @@
+# Verify if runner is already registered
+- name: Check if config file exists
+  stat:
+    path: /home/{{ ansible_user }}/.gitlab-runner/config.toml
+  register: config_file
+  become: true
+
+
+- name: Check if GitLab Runner is already registered
+  shell: |
+    grep -q "{{ item.runner_tags }}" /home/{{ ansible_user }}/.gitlab-runner/config.toml
+  loop: "{{ runner_config_settings }}"
+  when: config_file.stat.exists
+  register: runner_check
+  become: true
+  changed_when: false
+  ignore_errors: true
+
+- name: Debug runner check result
+  debug:
+    var: runner_check.results[0].rc
+
+- name: Register GitLab Runner
+  shell: |
+    gitlab-runner register \
+      --non-interactive \
+      --url {{ item.gitlab_url }} \
+      --registration-token {{ item.gitlab_runner_token }} \
+      --executor shell \
+      --description "{{ item.runner_description }}" \
+      --tag-list "{{ item.runner_tags }}"
+  loop: "{{ runner_config_settings }}"
+  register: runner_output
+  when: runner_check.results[0].rc != 0
+
+
+- name: Display GitLab Runner registration output
+  debug:
+    var: "{{ runner_output }}"
+
+
+- name: Copy .gitlab-ci.yml
+  template:
+    src: .gitlab-ci.yml
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.gitlab-ci.yml
+    mode: '0644'
+  loop: "{{ project_directory_name }}"
+
+- name: Create user and email for local git repository
+  shell: |
+    cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    git config user.name {{ item.git_username }} && git config user.email {{ item.git_email }}
+  loop: "{{ project_directory_name }}"
+
+- name: Commit and push changes to GitLab
+  shell: |
+    cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}
+    git add .
+    git commit -m "Automated commit from Ansible - {{ ansible_date_time.iso8601 }}"
+    git push origin "{{ item.branch_work }}"
+  environment:
+    GIT_SSH_COMMAND: "ssh -i {{ private_key }}"
+  loop: "{{ project_directory_name }}"

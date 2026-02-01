@@ -1,0 +1,6 @@
+---
+- include_tasks: deploy-app.yml
+- include_tasks: reverse-proxy.yml
+- include_tasks: runner.yml
+
+

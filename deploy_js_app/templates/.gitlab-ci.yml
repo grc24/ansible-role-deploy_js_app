@@ -1,0 +1,55 @@
+stages:
+    - test
+    - secret-detection
+    - build
+    - deploy
+
+sast:
+  stage: test
+
+secret_detection:
+  stage: secret-detection
+
+variables:
+  OLD_IMAGE: "image: {{ clone_directory | lower }}"
+  UPDATED_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  SECRET_DETECTION_ENABLED: 'true'
+
+include:
+- template: Security/SAST.gitlab-ci.yml
+- template: Security/Secret-Detection.gitlab-ci.yml
+
+build:
+  image: docker:19.03.1
+  stage: build
+  variables:
+    IMAGE_LATEST: $CI_REGISTRY_IMAGE
+  services:
+    - docker:19.03.1-dind
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script:
+    - docker build --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }} --build-arg NODE_ENV={{ ENV }} --build-arg NODE_VERSION={{ NODE_VERSION }} -t $CI_REGISTRY_IMAGE .
+    - docker tag $CI_REGISTRY_IMAGE "{{ project_name | lower }}_api"
+    - docker push $CI_REGISTRY_IMAGE  
+  when: on_success
+  tags:
+    - "{{ item.runner }}"
+  only:
+    - "{{ item.branch_work }}"
+
+
+deploy:
+  stage: deploy
+  variables:
+    IMAGE_LATEST: $CI_REGISTRY_IMAGE
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  script: 
+    - cd /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+    - docker compose down {{ item.service_name }} && docker compose up -d {{ item.service_name }}
+  tags:
+    - "{{ item.runner }}"
+  only: 
+    - "{{ item.branch_work }}"
+

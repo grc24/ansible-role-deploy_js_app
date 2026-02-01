@@ -1,0 +1,50 @@
+- name: Configure Nginx server block 
+  template:
+    src:  nginx.conf
+    dest: /etc/nginx/sites-available/{{ item.server_name }}
+  loop: "{{ server_blocks }}"
+
+- name: Enable the server block 
+  file:
+    src: /etc/nginx/sites-available/{{ item.server_name }}
+    dest: /etc/nginx/sites-enabled/{{ item.server_name }}
+    state: link
+  loop: "{{ server_blocks }}"
+
+
+- name: Test Nginx configuration
+  command: nginx -t
+  register: nginx_test
+
+- name: Display Nginx test output
+  debug:
+    var: nginx_test.stdout
+
+- name: Reload Nginx
+  service:
+    name: nginx
+    state: reloaded
+
+
+- name: Obtain SSL certificates and configure Nginx
+  command: >
+    certbot --nginx
+    --non-interactive
+    --agree-tos
+    --email {{ item.email }}
+    -d {{ item.server_name }}
+  loop: "{{ server_blocks }}"
+
+- name: Test Nginx configuration after SSL setup
+  command: nginx -t
+  register: nginx_ssl_test
+
+- name: Display Nginx SSL test output
+  debug:
+    var: nginx_ssl_test.stdout{{ item.port }}
+  loop: "{{ server_blocks }}"
+
+- name: Reload Nginx to apply SSL configuration
+  service:
+    name: nginx
+    state: reloaded

@@ -1,0 +1,22 @@
+skip_list:
+  - "208"
+  - fqcn[action-core]
+  - fqcn[action]
+  - name[missing]
+  - name[template]
+  - key-order[task]
+  - name[play]
+  - name[casing]
+  - no-free-form
+  - run-once
+  - no-changed-when
+  - role-name
+  - yaml[octal-values]
+  - ignore-errors
+  - no-handler
+
+exclude_paths:
+  - .venv/
+  - .ansible/
+  - tests/
+  - molecule/
