@@ -8,7 +8,7 @@ project_directory_name:
     ports: 8400
     db_host: op27573-002.eu.clouddb.ovh.net
     db_port: 35710
-    db_password: TqtUKdgNhjZQJK3
+    db_password: 
     server_name: api.flashcar-parck.waouhmonde.com
     db_user: flashcar_user
     db_database: flashcar_pack_db
