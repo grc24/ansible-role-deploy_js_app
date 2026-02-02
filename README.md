@@ -1,31 +1,86 @@
-Role Name
+Deploy JS app
 =========
 
-A brief description of the role goes here.
+This role is helping developpers to auto deploy their applications from code repository to domain + ssl configurations
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Need ansible to be install 
+You need to :
+* Install and configure Ansible
+* Install and configure Gitlab runner
+* Install and configure nginx reverse proxy
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+We need a file here
 
+**VAR Files**
+```bash
+  project_directory_name: 
+    - repository: git@gitlab.com:waouhmonde/repository.git
+      branch_work: dev
+      runner: project_name-2
+      service_name: mon-garagiste-api
+      git_username: waouhmonde_dav97
+      git_email: mon_email_prod@domain.com
+      ports: 8399
+      remote_db: false
+      db_image: postgres:15
+      db_port: 5432
+      db_dynamc_port: 8398
+      network_name: project_name
+      db_password: 
+      db_user: mon_garagistes
+      db_volume: psql-data
+      db_database: mon_garagistes
+      db_container: repository_db
+      db_host: 
+      app_port: 3000
+      database_url: postgresql://mon_garagistes:@localhost:5432/mon_garagistes
+      
+      
+  project_name: project_name
+  clone_directory: mon-garagiste-api
+  private_key: /home/debian/.ssh/id_rsa
+  network_name: project_name
+
+  TYPE_PROJECT: nestjs
+  ENV: production
+  NODE_VERSION: 20
+
+  server_blocks:
+    - server_name: api.project_name.domain.com
+      port: 8399
+      email: mon_email_prod@domain.com
+
+  runner_config_settings:
+    - gitlab_url: "https://gitlab.com/"
+      gitlab_runner_token: ""
+      runner_description: "project_name-runner"
+      runner_tags: "project_name"
+
+```
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+No dependecies roles
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+[preprod]
+domain.com
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+[preprod:vars]
+ansible_user=debian
+ansible_password=
+ansible_become_password=
+ansible_connection=ssh
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
 
 License
 -------
@@ -35,4 +90,4 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+SEIDOU DAVID - DevOps & Cloud
