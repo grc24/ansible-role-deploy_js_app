@@ -6,11 +6,12 @@ This role is helping developpers to auto deploy their applications from code rep
 Requirements
 ------------
 
-Need ansible to be install 
-You need to :
-* Install and configure Ansible
-* Install and configure Gitlab runner
-* Install and configure nginx reverse proxy
+- **Ansible**: 2.10.0+
+- **Target OS**: Ubuntu >= 22.04
+- **Gitlabrunner**: 4.x installed on target hosts
+- **Nginx**: Latest version
+- **Privileges**: sudo/root access on managed nodes
+
 
 Role Variables
 --------------
@@ -18,7 +19,8 @@ Role Variables
 We need a file here
 
 **VAR Files**
-```bash
+```yaml
+---
   project_directory_name: 
     - repository: git@gitlab.com:waouhmonde/repository.git
       branch_work: dev
@@ -68,8 +70,30 @@ Dependencies
 
 No dependecies roles
 
+## Usage
+
+### Basic Playbook
+
+```yaml
+---
+- hosts: db_servers
+  become: true
+  roles:
+    - role: runsel.cis_postgresql_17
+```
+
 Example Playbook
 ----------------
+
+```yaml
+---
+- hosts: db_servers
+  become: true
+  roles:
+    - role: grc24.deploy_js_app
+```
+### Inventory 
+
 ```bash
   [preprod]
   domain.com
@@ -82,6 +106,12 @@ Example Playbook
   ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 ```
 
+### Testing
+
+```bash
+nano variables_files.yaml
+ansible-playbook -i inventory playbook.yml -e "@variables_files.yaml"
+```
 License
 -------
 
