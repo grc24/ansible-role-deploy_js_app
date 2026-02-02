@@ -76,22 +76,12 @@ No dependecies roles
 
 ```yaml
 ---
-- hosts: db_servers
-  become: true
-  roles:
-    - role: runsel.cis_postgresql_17
-```
-
-Example Playbook
-----------------
-
-```yaml
----
-- hosts: db_servers
+- hosts: preprod_server
   become: true
   roles:
     - role: grc24.deploy_js_app
 ```
+
 ### Inventory 
 
 ```bash
@@ -120,4 +110,4 @@ BSD
 Author Information
 ------------------
 
-SEIDOU DAVID - DevOps & Cloud
+SEIDOU DAVID | DevOps & Cloud | seidoudavid97@gmail.com
