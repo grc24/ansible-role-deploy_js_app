@@ -70,17 +70,17 @@ No dependecies roles
 
 Example Playbook
 ----------------
+```bash
+  [preprod]
+  domain.com
 
-[preprod]
-domain.com
-
-[preprod:vars]
-ansible_user=debian
-ansible_password=
-ansible_become_password=
-ansible_connection=ssh
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-
+  [preprod:vars]
+  ansible_user=debian
+  ansible_password=
+  ansible_become_password=
+  ansible_connection=ssh
+  ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+```
 
 License
 -------
