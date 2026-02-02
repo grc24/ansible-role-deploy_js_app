@@ -3,22 +3,4 @@
   hosts:  preprod
   become: true
   roles:
-    - laravel
-
-# - name: Installation et configuration projet Adonisjs
-#   hosts:  preprod
-#   become: true
-#   roles:
-#     - adonisjs
-
-# - name: Installation et configuration projet Vuejs
-#   hosts:  preprod
-#   become: true
-#   roles:
-#     - vuejs
-
-# - name: tasks file for empty-csaf-job
-#   hosts:  preprod
-#   become: true
-#   roles:
-#     - empty-csaf-job
+    - deploy_js_app
