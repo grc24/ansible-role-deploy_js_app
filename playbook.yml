@@ -1,5 +1,5 @@
 ---
-- name: Installation et configuration projet Laravel
+- name: Installation et configuration de l'application JavaScript en préproduction
   hosts:  preprod
   become: true
   roles:
