@@ -1,4 +1,5 @@
 galaxy_info:
+  role_name: deploy_js_app
   author: SEIDOU DAVID
   description: Template to deploy JS app from source code to dns and reverse proxy configuration. Include ssl letsencrypt resolution 
   company: CloudENV
