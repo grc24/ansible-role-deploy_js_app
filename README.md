@@ -22,11 +22,11 @@ We need a file here
 ```yaml
 ---
   project_directory_name: 
-    - repository: git@gitlab.com:waouhmonde/repository.git
+    - repository: git@gitlab.com:group/repository.git
       branch_work: dev
       runner: project_name-2
       service_name: mon-garagiste-api
-      git_username: waouhmonde_dav97
+      git_username: your_gitlab_useranem
       git_email: mon_email_prod@domain.com
       ports: 8399
       remote_db: false
