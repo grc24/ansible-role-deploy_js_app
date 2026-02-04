@@ -68,8 +68,17 @@ We need a file here
 Dependencies
 ------------
 
-No dependecies roles
+**Thoses packages have to be installed on the target hosts**
 
+``` bash
+  roles:
+    - name: geerlingguy.docker
+      version: "7.5.0"
+    - name: geerlingguy.nginx
+      version: "3.1.4"
+    - role: geerlingguy.certbot
+    - role: riemers.gitlab-runner
+```
 ## Usage
 
 ### Basic Playbook
