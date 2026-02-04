@@ -108,8 +108,6 @@ Dependencies
 ### Testing
 
 ```bash
-#Create variables files
-nano variables_files.yaml
 
 # Create  requirements file for galaxy to make sure we install a specfic version
 cat > requirements.yml <<EOF
@@ -121,6 +119,9 @@ roles:
 EOF
 # Download the roles
 ansible-galaxy install -r requirements.yml
+
+#Create variables files
+nano variables_files.yaml
 
 # Apply the roles with custom variables
 ansible-playbook -i inventory playbook.yml -e "@variables_files.yaml"
