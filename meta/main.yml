@@ -48,4 +48,9 @@ galaxy_info:
     - docker
     - api
 
-dependencies: []
+
+dependencies:
+  - role: geerlingguy.docker
+  - role: geerlingguy.nginx
+  - role: geerlingguy.certbot
+  - role: riemers.gitlab-runner
