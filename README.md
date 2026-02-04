@@ -108,7 +108,21 @@ Dependencies
 ### Testing
 
 ```bash
+#Create variables files
 nano variables_files.yaml
+
+# Create  requirements file for galaxy to make sure we install a specfic version
+cat > requirements.yml <<EOF
+roles:
+  - name: deploy_js_app
+    src: https://github.com/grc24/ansible-role-deploy_js_app.git
+    scm: git
+    version: v1.0.0
+EOF
+# Download the roles
+ansible-galaxy install -r requirements.yml
+
+# Apply the roles with custom variables
 ansible-playbook -i inventory playbook.yml -e "@variables_files.yaml"
 ```
 License
