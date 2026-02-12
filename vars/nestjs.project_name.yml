@@ -28,7 +28,7 @@ clone_directory: mon-garagiste-api
 private_key: /home/debian/.ssh/id_rsa
 network_name: project_name
 
-TYPE_PROJECT: nestjs
+deployment_type: nestjs
 ENV: production
 NODE_VERSION: 20
 

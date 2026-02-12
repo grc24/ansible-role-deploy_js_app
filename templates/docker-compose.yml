@@ -9,12 +9,12 @@ services:
       - "{{ item.ports }}:{{ item.app_port }}"
     env_file:
       - .env
-    {% if item.remote_db == 0 %}
-    depends_on:
-      - "{{ item.db_container }}"
-    {% endif %}
-
   {% if item.remote_db == 0 %}
+  depends_on:
+      - "{{ item.db_container }}"
+  {% endif %}
+
+{% if item.remote_db == 0 %}
   "{{ item.db_container }}":
     image: "{{ item.db_image }}"
     container_name: "{{ item.db_container }}_db"
@@ -23,13 +23,13 @@ services:
       POSTGRES_USER: "{{ item.db_user }}"
       POSTGRES_PASSWORD: "{{ item.db_password }}"
       POSTGRES_DB: "{{ item.db_database }}"
-    ports:
-      - "{{ item.db_dynamc_port }}:{{ item.db_port }}"
+    # ports:
+    #   - "{{ item.db_dynamc_port }}:{{ item.db_port }}"
     volumes:
       - "{{ item.db_volume }}:/var/lib/postgresql/data"
     expose: 
       - "{{ item.db_port }}"
-  {% endif %}
+{% endif %}
 
 
 {% if item.remote_db == 0 %}

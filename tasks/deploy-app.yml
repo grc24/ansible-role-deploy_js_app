@@ -44,33 +44,92 @@
   command: docker network create {{ network_name }} 
   when: result is failed
 
-# Custome docker compose and env
-- name: copy env
+# Add .env based on project type
+- name: copy env for nodejs
   template:
-    src: .env
+    src: nodejs.env
     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.env
   when: TYPE_PROJECT == "nodejs"
-  loop: "{{ project_directory_name }}"
+  loop: "{{ project_directory_name }}" 
   
-- name: copy env for non-Node.js
+- name: copy env for nestjs
   template:
     src: nest.env
     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.env
-  when: TYPE_PROJECT != "nodejs"
+  when: TYPE_PROJECT == "nestjs"
   loop: "{{ project_directory_name }}"
 
+- name: copy env for vuejs
+  template:
+    src: vuejs.env
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.env
+  when: TYPE_PROJECT == "vuejs"
+  loop: "{{ project_directory_name }}"
+
+- name: copy env for laravel
+  template:
+    src: laravel.env
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/.env
+  when: TYPE_PROJECT == "laravel"
+  vars:
+    server_name: "{{ server_blocks[0].server_name }}"
+  #loop: "{{ project_directory_name }}"
+  loop: "{{ server_blocks | product(project_directory_name) | list }}"
+
+
+# Add Dockerfile based on project type
 - name: copy Dockerfile for Node.js
   template:
-    src: Dockerfile
+    src: nodejs.Dockerfile
     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
   when: TYPE_PROJECT == "nodejs"
   loop: "{{ project_directory_name }}"
 
-- name: copy Dockerfile for non-Node.js
+- name: copy Dockerfile for nestjs
   template:
-    src: nest.Dockerfile
+    src: nestjs.Dockerfile
     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
-  when: TYPE_PROJECT != "nodejs"
+  when: TYPE_PROJECT == "nestjs"
+  loop: "{{ project_directory_name }}"
+
+- name: copy Dockerfile for laravel
+  template:
+    src: laravel.Dockerfile
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
+  when: TYPE_PROJECT == "laravel"
+  loop: "{{ project_directory_name }}"
+
+- name: copy Dockerfile for vuejs
+  template:
+    src: vuejs.Dockerfile
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/Dockerfile
+  when: TYPE_PROJECT == "vuejs"
+  loop: "{{ project_directory_name }}"
+  
+# Additional build args and build docker image
+- name: Add entrypoint for laravel projects
+  template:
+    src: laravel.entrypoint.sh
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker/entrypoint.sh
+    mode: '0755'
+  when: TYPE_PROJECT == "laravel"
+  loop: "{{ project_directory_name }}"  
+
+# Create docker folder in clone directory
+- name: Create docker folder in clone directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker
+    state: directory
+    mode: '0755'
+  when: TYPE_PROJECT == "vuejs"
+  loop: "{{ project_directory_name }}"
+  
+# Add nginx config for vuejs projects
+- name: copy nginx config for vuejs
+  template:
+    src: vuejs.config
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker/config
+  when: TYPE_PROJECT == "vuejs"
   loop: "{{ project_directory_name }}"
 
 
@@ -83,24 +142,59 @@
   register: result_image
   ignore_errors: True
 
-- name: Build Docker image
-  command:  docker build  --build-arg DATABASE_URL={{ item.database_url }} --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }} --build-arg NODE_ENV={{ ENV }} --build-arg NODE_VERSION={{ NODE_VERSION }} -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+# build the app
+- name: Build Docker image for nodejs
+  command:  docker build --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }} --build-arg NODE_ENV={{ ENV }} --build-arg NODE_VERSION={{ NODE_VERSION }}  -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
   args:
     chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
-  when: result_image is failed
+  when: result_image is failed and TYPE_PROJECT == "nodejs"
   loop: "{{ project_directory_name }}"
   register: output
+
+- name: Build Docker image for nestjs
+  command:  docker build  --build-arg DATABASE_URL={{ item.database_url }} --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }} --build-arg NODE_ENV={{ ENV }} --build-arg NODE_VERSION={{ NODE_VERSION }}  -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  when: result_image is failed and TYPE_PROJECT == "nestjs"
+  loop: "{{ project_directory_name }}"
+  register: output
+
+- name: Build Docker image for laravel
+  command:  docker build  --build-arg PHP_VERSION={{ PHP_VERSION }} -t {{ docker_image_name }} /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  when: result_image is failed and TYPE_PROJECT == "laravel"
+  loop: "{{ project_directory_name }}"
+  register: output
+
+- name: Build Docker image for vuejs
+  command:  docker build --build-arg NODE_VERSION={{ NODE_VERSION }} -t {{ project_name | lower }}_frontend /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  args:
+    chdir: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }} 
+  when: result_image is failed and TYPE_PROJECT == "vuejs"
+  loop: "{{ project_directory_name }}"
+  register: output
+
 
 - name: view image 
   debug:
     var: output
-  
-- name: Update file docker compose
+    
+#Update docker compose file
+- name: Update file docker compose for frontend vuejs
+  when: TYPE_PROJECT == "vuejs"
   template:
-    src:  docker-compose.yml
+    src:  vuejs.docker-compose.yml
     dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
   loop: "{{ project_directory_name }}"
 
+- name: Update file docker compose for api
+  when: TYPE_PROJECT != "vuejs"
+  template:
+    src:  docker-compose.yml
+    dest: /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml
+    mode: '0755'
+  loop: "{{ project_directory_name }}"
 
 - name: Start Docker Compose application
   command: docker compose -f /home/{{ ansible_user }}/{{ project_name }}/{{ clone_directory }}/docker-compose.yml  up -d

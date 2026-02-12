@@ -1,0 +1,42 @@
+---
+# vars file for adonisjs
+project_directory_name: 
+  - repository: git@gitlab.com:domain/repositoy_name.git                      # ssh code repository
+    branch_work: dev                                                          # Branch for the deployment
+    runner: project_name                                                      # Runner name
+    service_name: repositoy_name                                              # Docker compose service
+    git_username: domain_dav97                                                # Username: Use to push the entire code updated in your server to gitlab
+    git_email: david.seidou@domain.com                                        # Email: Use to push the entire code updated in your server to gitlab
+    ports: 8996                                                               # Dynamic port mapped container port to container outside container
+    db_dynamc_port: 8398                                                      # Don't expose your db , only in development or local environment 
+    network_name: my-network                                                  # Create your Docker network 
+    app_port: 80                                                              # Do not change this for vue js project
+    
+    
+project_name: repositoy_name
+clone_directory: repositoy_name                                               # Directory where your code will be pull on
+private_key: /home/debian/.ssh/id_rsa                                         # A private key that your to sign and auth on gitlab
+network_name: my-network                                                      # Create your Docker network 
+
+# Build docker image  configuration
+# Variables that we use while generated docker image of your app
+deployment_type: vuejs                                                        # Type of project your want to deploy (laravel, vuejs, nodejs, nestjs)
+ENV: production                                                               # Development Environment
+NODE_VERSION: 22-alpine                                                       # Node version for your apps
+api_url: api.domain.com                                                       # API Link
+
+
+# DNS configuration
+# Need a setup DNS record type A on the domain pointing on server IP
+server_blocks:
+  - server_name: api.project_name.domain.com                                  # Domain for your frontend application
+    port: 8399                                                                # Dynamic port mapped container port to container outside container
+    email: mon_email_prod@domain.com                                          # email for acme challenge
+
+# Runner configuration
+# Need a token  that can be get from Gitlab dashboard
+runner_config_settings:
+  - gitlab_url: "https://gitlab.com/"                                         # Do not change ths !!!
+    gitlab_runner_token: ""                                                   # Gitlab runner  token received from gitlab dashboard
+    runner_description: "project_name-runner"                                 # Description while creating the token , you can use runner tags name by default
+    runner_tags: "project_name"                                               # Runner name

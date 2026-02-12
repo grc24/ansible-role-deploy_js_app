@@ -31,13 +31,45 @@
       --tag-list "{{ item.runner_tags }}"
   loop: "{{ runner_config_settings }}"
   register: runner_output
-  when: runner_check.results[0].rc != 0
+  #when: runner_check.results[0].rc != 0
 
 
 - name: Display GitLab Runner registration output
   debug:
     var: "{{ runner_output }}"
 
+- name: Define docker build command
+  set_fact:
+    docker_build_cmd: >-
+      {% if TYPE_PROJECT == "vuejs" %}
+      docker build --build-arg NODE_VERSION={{ NODE_VERSION }} -t $CI_REGISTRY_IMAGE .
+      {% elif TYPE_PROJECT == "laravel" %}
+      docker build --build-arg PHP_VERSION={{ PHP_VERSION }} -t $CI_REGISTRY_IMAGE .
+      {% elif TYPE_PROJECT == "nodejs" %}
+      docker build
+      --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }}
+      --build-arg NODE_ENV={{ ENV }}
+      --build-arg NODE_VERSION={{ NODE_VERSION }}
+      -t $CI_REGISTRY_IMAGE .
+      {% elif TYPE_PROJECT == "nestjs" %}
+      docker build
+      --build-arg DATABASE_URL={{ item.database_url }}
+      --build-arg PORT_INSIDE_CONTAINER={{ item.app_port }}
+      --build-arg NODE_ENV={{ ENV }}
+      --build-arg NODE_VERSION={{ NODE_VERSION }}
+      -t $CI_REGISTRY_IMAGE .
+      {% endif %}
+  loop: "{{ project_directory_name }}"
+
+- name: Define docker tag command
+  set_fact:
+    docker_tag_cmd: >-
+      {% if TYPE_PROJECT == "vuejs" %}
+      docker  tag  $CI_REGISTRY_IMAGE  "{{ project_name | lower }}_frontend:latest"
+      {% else %}
+      docker  tag  $CI_REGISTRY_IMAGE  "{{ project_name | lower }}_api:latest"
+      {% endif %}
+  loop: "{{ project_directory_name }}"
 
 - name: Copy .gitlab-ci.yml
   template:

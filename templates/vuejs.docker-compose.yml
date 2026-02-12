@@ -1,0 +1,15 @@
+version: "3.4"
+
+services:
+  "{{ item.service_name }}":
+    image: "{{ project_name | lower }}_frontend"
+    container_name: "{{ project_name | lower }}_frontend"
+    restart: always
+    ports:
+      - "{{ item.ports }}:80"
+
+
+networks:
+  default:
+    external: true
+    name: "{{ network_name }}"

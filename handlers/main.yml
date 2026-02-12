@@ -1,2 +1,7 @@
 ---
 # handlers file for adonisjs
+# Run this handle after a reverse-proxy.yml task
+- name: Reload Nginx to apply SSL configuration
+  service:
+    name: nginx
+    state: reloaded
